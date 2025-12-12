@@ -46,6 +46,7 @@ class AdminInputData(BaseModel):
     contact: str = Field(..., example="cellular")
     month: str = Field(..., example="may")
     day_of_week: str = Field(..., example="mon")
+    duration: int = Field(..., ge=0, example=200, description="Durasi telepon dalam detik")
     campaign: int = Field(..., ge=1, example=1)
     pdays: int = Field(..., ge=0, example=999)
     previous: int = Field(..., ge=0, example=0)
@@ -54,13 +55,11 @@ class AdminInputData(BaseModel):
 # --- FEATURE ENGINEERING (Wajib Sama Persis dengan Training) ---
 def apply_custom_features(df_input):
     df = df_input.copy()
+    df['duration_per_campaign'] = df['duration'] / (df['campaign'] + 1)
+    df['is_contacted_before'] = (df['pdays'] != 999).astype(int)
+    df['is_success_campaign'] = (df['poutcome'] == 'success').astype(int)
+    df['euribor_emp'] = df['euribor3m'] * df['nr.employed']
     df['fatigued_client'] = (df['campaign'] > 4).astype(int)
-    df['economic_pressure'] = df['euribor3m'] * df['cons.price.idx']
-    df['never_contacted'] = (df['pdays'] == 999).astype(int)
-    df['deposit_influencer'] = (
-        ((df['euribor3m'] < 2).astype(int)) &
-        (df['poutcome'] == 'success').astype(int)
-    )
     return df
 
 # --- ENDPOINTS ---
