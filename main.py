@@ -163,7 +163,7 @@ async def predict_batch(file: UploadFile = File(...)):
         # 3. Validasi Kolom Wajib (Harus ada di Excel user)
         required_columns = [
             'age', 'job', 'marital', 'education', 'default', 'housing', 'loan',
-            'contact', 'month', 'day_of_week', 'campaign', 'pdays', 'previous', 'poutcome'
+            'contact', 'month', 'day_of_week', 'campaign', 'pdays', 'previous', 'poutcome', 'duration'
         ]
         missing_cols = [col for col in required_columns if col not in df_batch.columns]
         if missing_cols:
