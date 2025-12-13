@@ -150,23 +150,28 @@ async def predict_batch(file: UploadFile = File(...)):
         raise HTTPException(status_code=503, detail="Model offline.")
 
     # 1. Validasi Format File
-    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
-        raise HTTPException(400, detail="Format file harus .xlsx atau .csv")
+    filename = file.filename.lower()
+    if not (filename.endswith('.csv') or filename.endswith('.xlsx') or filename.endswith('.xls')):
+        raise HTTPException(400, detail="Hanya terima .csv atau .xlsx")
 
     try:
         # 2. Baca File ke DataFrame
         contents = await file.read()
-        if file.filename.lower().endswith('.csv'):
-            # Deteksi otomatis delimiter
-            sniffer = csv.Sniffer()
-            sample = contents[:1024].decode('utf-8', errors='ignore')
-            dialect = sniffer.sniff(sample, delimiters=';,|\t')
-            df_batch = pd.read_csv(io.BytesIO(contents), sep=dialect.delimiter, engine='python')
-            print(f"CSV dibaca otomatis dengan delimiter: '{dialect.delimiter}'")
-        elif file.filename.lower().endswith(('.xlsx', '.xls')):
-            df_batch = pd.read_excel(io.BytesIO(contents))
+        if filename.endswith('.csv'):
+            # Coba 3 kemungkinan delimiter — pasti salah satu benar
+            for sep in [';', ',', '\t']:
+                try:
+                    temp_df = pd.read_csv(io.BytesIO(contents), sep=sep, nrows=5)
+                    if len(temp_df.columns) > 10:  # kalau kolom >10 → benar
+                        df_batch = pd.read_csv(io.BytesIO(contents), sep=sep, on_bad_lines='skip')
+                        print(f"CSV berhasil dibaca dengan separator: '{sep}'")
+                        break
+                except:
+                    continue
+            else:
+                raise HTTPException(400, detail="Gagal baca CSV — format tidak dikenali")
         else:
-            raise HTTPException(400, detail="Format file harus .csv atau .xlsx")
+            df_batch = pd.read_excel(io.BytesIO(contents))
 
         # 3. Validasi Kolom Wajib (Harus ada di Excel user)
         required_columns = [
