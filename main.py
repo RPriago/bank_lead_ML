@@ -1,4 +1,5 @@
 import os
+import csv
 import joblib
 import pandas as pd
 import io
@@ -155,10 +156,17 @@ async def predict_batch(file: UploadFile = File(...)):
     try:
         # 2. Baca File ke DataFrame
         contents = await file.read()
-        if file.filename.endswith('.csv'):
-            df_batch = pd.read_csv(io.BytesIO(contents))
-        else:
+        if file.filename.lower().endswith('.csv'):
+            # Deteksi otomatis delimiter
+            sniffer = csv.Sniffer()
+            sample = contents[:1024].decode('utf-8', errors='ignore')
+            dialect = sniffer.sniff(sample, delimiters=';,|\t')
+            df_batch = pd.read_csv(io.BytesIO(contents), sep=dialect.delimiter, engine='python')
+            print(f"CSV dibaca otomatis dengan delimiter: '{dialect.delimiter}'")
+        elif file.filename.lower().endswith(('.xlsx', '.xls')):
             df_batch = pd.read_excel(io.BytesIO(contents))
+        else:
+            raise HTTPException(400, detail="Format file harus .csv atau .xlsx")
 
         # 3. Validasi Kolom Wajib (Harus ada di Excel user)
         required_columns = [
