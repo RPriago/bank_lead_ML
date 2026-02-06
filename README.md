@@ -80,4 +80,50 @@ source venv/bin/activate  # On Windows use: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### 2. Run the API Server
+```bash
+uvicorn main:app --reload
+```
+The API will be available at http://localhost:8000.
 
+### 3. API Documentation
+Once running, go to http://localhost:8000/docs to see the interactive Swagger UI.
+
+Example Request (POST /predict)
+```bash
+{
+  "age": 35,
+  "job": "management",
+  "marital": "married",
+  "education": "tertiary",
+  "default": "no",
+  "balance": 2500,
+  "housing": "yes",
+  "loan": "no",
+  "contact": "cellular",
+  "day": 15,
+  "month": "may",
+  "duration": 200,
+  "campaign": 2,
+  "pdays": -1,
+  "previous": 0,
+  "poutcome": "unknown"
+}
+```
+Example Response
+```bash
+{
+  "PREDIKSI_REKOMENDASI": "HUBUNGI",
+  "SKOR_PROBABILITAS": 0.82,
+  "CATATAN": "High Potential"
+}
+```
+
+## 🔮 Future Improvements
+* Containerize the application for easier deployment.
+* Build a Streamlit frontend for non-technical users.
+* Connect to live API for interest rates
+
+## 👤 Author
+* GitHub: https://github.com/RPriago
+* Linkedin: https://linkedin.com/ranggapriago
