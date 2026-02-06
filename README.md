@@ -66,4 +66,18 @@ The model is served via a REST API with the following capabilities:
 ```
 ## ⚡ How to Run
 
+### 1. Setup Environment
+```bash
+# Clone repository
+git clone [https://github.com/RPriago/bank_lead_ML.git](https://github.com/RPriago/bank_lead_ML.git)
+cd bank_lead_ML
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
 
